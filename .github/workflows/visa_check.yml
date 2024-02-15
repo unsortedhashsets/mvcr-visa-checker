@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
@@ -26,6 +26,27 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run script
-      run: python check_visa.py
+      id: run-script
+      continue-on-error: true
+      run: |
+        set +e
+        python check_visa.py
+        echo "MVCR_RC=$?" >> $GITHUB_OUTPUT
       env:
         VISA_STRING: ${{ secrets.VISA_STRING }}
+
+    - name: SUCCESS
+      if: steps.run-script.outputs.MVCR_RC == '0'
+      run: echo "SUCCESS, ${{ steps.run-script.outputs.MVCR_RC }}"
+
+    - name: IN PROGRESS
+      if: steps.run-script.outputs.MVCR_RC == '1'
+      run: echo "IN PROGRESS, ${{ steps.run-script.outputs.MVCR_RC }}"
+
+    - name: NOT FOUND
+      if: steps.run-script.outputs.MVCR_RC == '2'
+      run: echo "NOT FOUND, ${{ steps.run-script.outputs.MVCR_RC }}"
+
+    - name: REJECTED
+      if: steps.run-script.outputs.MVCR_RC == '3'
+      run: echo "REJECTED, ${{ steps.run-script.outputs.MVCR_RC }}"

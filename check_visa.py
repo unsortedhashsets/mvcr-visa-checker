@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.expected_conditions import text_to_be_present_in_element
+
 from dotenv import load_dotenv
 import os
 import sys
@@ -24,7 +26,8 @@ try:
         parts = visa_string.replace('/', '-').split('-')
         parts[1] = parts[1].lstrip('0')
     else:
-        sys.exit(3)
+        print('ERROR, VISA_STRING is not set, OAM-000123-XX/DP-2000')
+        sys.exit(4)
     
     input_field_1 = driver.find_element(By.XPATH, "//input[@placeholder='12345']")
     input_field_1.send_keys(parts[1])
@@ -40,16 +43,31 @@ try:
     
     button = driver.find_element(By.CSS_SELECTOR, '.button.button__primary.button--large')
     button.click()
-        
+    
+    WebDriverWait(driver, 15).until(
+        text_to_be_present_in_element((By.CLASS_NAME, 'alert__content'), " ")
+    )
+    alert_content_element = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CLASS_NAME, 'alert__content'))) 
     alert_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'alert')))
     classes = alert_element.get_attribute("class").split(' ')
     other_classes = [cls for cls in classes if cls != 'alert']
     
-    if 'alert--form-warning' in other_classes:
-        print('IN PROGRESS')
-    elif 'alert--form-success' in other_classes:
-        print('SUCCESS')
+    if 'alert--form-success' in other_classes: 
+        print('SUCCESS, Visa is ready!')
+        sys.exit(0)
+    elif 'alert--form-warning' in other_classes:
+        print('IN PROGRESS, Visa is not ready yet.')
+        sys.exit(1)
     else:
-        print('ERROR')
+        if 'nebylo nalezeno' in alert_content_element.text:
+            print('ERROR, not in the system.')
+            sys.exit(2)
+        elif 'bylo nepovoleno' in alert_content_element.text:
+            print('ERROR, Rejected.')
+            sys.exit(3)
+        else:
+            print('ERROR, unknown error.')
+            sys.exit(4)
+    
 finally:
     driver.quit()
