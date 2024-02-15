@@ -1,0 +1,31 @@
+name: Check Visa
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  push:
+    branches:
+      - main
+
+jobs:
+  check_visa:
+    environment: VISA_STRING
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run script
+      run: python check_visa.py
+      env:
+        VISA_STRING: ${{ secrets.VISA_STRING }}
