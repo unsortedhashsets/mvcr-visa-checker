@@ -11,6 +11,8 @@ jobs:
   check_visa:
     environment: VISA_STRING
     runs-on: ubuntu-latest
+    outputs:
+      MVCR_RC: ${{ steps.run-script.outputs.MVCR_RC }}
     steps:
     - name: Check out code
       uses: actions/checkout@v4
@@ -35,18 +37,34 @@ jobs:
       env:
         VISA_STRING: ${{ secrets.VISA_STRING }}
 
+  success:
+    needs: check_visa
+    runs-on: ubuntu-latest
+    if: ${{ needs.check_visa.outputs.MVCR_RC == '0' }}
+    steps:
     - name: SUCCESS
-      if: steps.run-script.outputs.MVCR_RC == '0'
-      run: echo "SUCCESS, ${{ steps.run-script.outputs.MVCR_RC }}"
+      run: echo "SUCCESS"
 
+  in_progress:
+    needs: check_visa
+    runs-on: ubuntu-latest
+    if: ${{ needs.check_visa.outputs.MVCR_RC == '1' }}
+    steps:
     - name: IN PROGRESS
-      if: steps.run-script.outputs.MVCR_RC == '1'
-      run: echo "IN PROGRESS, ${{ steps.run-script.outputs.MVCR_RC }}"
+      run: echo "IN PROGRESS"
 
+  not_found:
+    needs: check_visa
+    runs-on: ubuntu-latest
+    if: ${{ needs.check_visa.outputs.MVCR_RC == '2' }}
+    steps:
     - name: NOT FOUND
-      if: steps.run-script.outputs.MVCR_RC == '2'
-      run: echo "NOT FOUND, ${{ steps.run-script.outputs.MVCR_RC }}"
+      run: echo "NOT FOUND"
 
+  rejected:
+    needs: check_visa
+    runs-on: ubuntu-latest
+    if: ${{ needs.check_visa.outputs.MVCR_RC == '3' }}
+    steps:
     - name: REJECTED
-      if: steps.run-script.outputs.MVCR_RC == '3'
-      run: echo "REJECTED, ${{ steps.run-script.outputs.MVCR_RC }}"
+      run: echo "REJECTED"
