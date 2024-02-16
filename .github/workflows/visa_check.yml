@@ -9,6 +9,7 @@ on:
 
 jobs:
   check_visa:
+    name: "🧾 CHECK"
     environment: VISA_STRING
     runs-on: ubuntu-latest
     outputs:
@@ -38,6 +39,7 @@ jobs:
         VISA_STRING: ${{ secrets.VISA_STRING }}
 
   success:
+    name: "🎉 SUCCESS"
     needs: check_visa
     runs-on: ubuntu-latest
     if: ${{ needs.check_visa.outputs.MVCR_RC == '0' }}
@@ -46,6 +48,7 @@ jobs:
       run: echo "SUCCESS"
 
   in_progress:
+    name: "⏳ IN PROGRESS"
     needs: check_visa
     runs-on: ubuntu-latest
     if: ${{ needs.check_visa.outputs.MVCR_RC == '1' }}
@@ -54,6 +57,7 @@ jobs:
       run: echo "IN PROGRESS"
 
   not_found:
+    name: "❌ NOT FOUND" 
     needs: check_visa
     runs-on: ubuntu-latest
     if: ${{ needs.check_visa.outputs.MVCR_RC == '2' }}
@@ -62,6 +66,7 @@ jobs:
       run: echo "NOT FOUND"
 
   rejected:
+    name: "🚫 REJECTED"
     needs: check_visa
     runs-on: ubuntu-latest
     if: ${{ needs.check_visa.outputs.MVCR_RC == '3' }}
