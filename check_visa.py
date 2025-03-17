@@ -19,7 +19,7 @@ driver = webdriver.Chrome(options=options)
 
 try:
     driver.get(url_to_check)
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='12345']")))
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "proceedings.referenceNumber")))
     
     visa_string = os.getenv('VISA_STRING')
     if visa_string:
@@ -29,10 +29,10 @@ try:
         print('ERROR, VISA_STRING is not set, OAM-000123-XX/DP-2000')
         sys.exit(4)
     
-    input_field_1 = driver.find_element(By.XPATH, "//input[@placeholder='12345']")
+    input_field_1 = driver.find_element(By.NAME, "proceedings.referenceNumber")
     input_field_1.send_keys(parts[1])
     
-    input_field_2 = driver.find_element(By.XPATH, "//input[@placeholder='XX']")
+    input_field_2 = driver.find_element(By.NAME, "proceedings.additionalSuffix")
     input_field_2.send_keys(parts[2])
     
     dropdowns = driver.find_elements(By.CLASS_NAME, 'react-select__value-container')
