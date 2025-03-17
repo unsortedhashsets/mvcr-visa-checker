@@ -14,7 +14,7 @@ load_dotenv()
 
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
-options.add_argument('--window-size=2560x2048')
+options.add_argument('--window-size=2560,2048')
 driver = webdriver.Chrome(options=options)
 
 try:
